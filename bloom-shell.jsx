@@ -1,37 +1,8 @@
-// ===== Bloom — shell components: Phone frame, TabBar, Toast, Confetti, icons =====
+// ===== Bloom — shell components: fullscreen wrapper, TabBar, Toast, Confetti, icons =====
 
-// ---------- Phone frame ----------
+// ---------- Phone (fullscreen wrapper — no chrome) ----------
 window.Phone = function Phone({ children }){
-  const [time, setTime] = React.useState(() => {
-    const d = new Date();
-    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-  });
-  React.useEffect(() => {
-    const id = setInterval(() => {
-      const d = new Date();
-      setTime(`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`);
-    }, 30000);
-    return () => clearInterval(id);
-  }, []);
-
-  return (
-    <div className="stage">
-      <div className="phone-wrap">
-        <div className="phone">
-          <div className="notch"/>
-          <div className="stat">
-            <div className="l">{time}</div>
-            <div className="r">
-              <span>●●●●</span>
-              <span>📶</span>
-              <span className="b"/>
-            </div>
-          </div>
-          {children}
-        </div>
-      </div>
-    </div>
-  );
+  return <div className="app-shell">{children}</div>;
 };
 
 // ---------- TabBar ----------
@@ -42,7 +13,6 @@ window.TabBar = function TabBar({ active, onChange, onAdd }){
     { k:'journal', icon: <><path d="M4 4h12a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 9h8M8 13h6"/></> },
     { k:'profile', icon: <><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></> },
   ];
-  // We render: home, care, ADD, journal, profile
   return (
     <div className="tabbar">
       {tabs.slice(0,2).map(t => (
@@ -130,25 +100,21 @@ window.Sun = function Sun({ w = 20 }){
 };
 
 // ---------- PotPlant illustration ----------
-// kind index matches BLOOM_KINDS order
 window.PotPlant = function PotPlant({ kind = 0, scale = 1, mood = 'leaf' }){
   const size = 90 * scale;
   const variants = [
-    // 0 monstera — big perforated leaves
     <g key="m">
       <path d="M50 60 C 30 50, 25 30, 40 18 C 55 22, 60 40, 55 56 Z" fill="#3F8C6A"/>
       <path d="M50 60 C 70 52, 78 30, 65 16 C 50 22, 46 40, 50 58 Z" fill="#4FA67C"/>
       <circle cx="42" cy="30" r="3" fill="#FBF3E4"/>
       <circle cx="60" cy="28" r="3" fill="#FBF3E4"/>
     </g>,
-    // 1 cactus
     <g key="c">
       <rect x="42" y="20" width="16" height="50" rx="8" fill="#4FA67C"/>
       <rect x="28" y="40" width="12" height="22" rx="6" fill="#4FA67C"/>
       <rect x="60" y="34" width="12" height="28" rx="6" fill="#4FA67C"/>
       <circle cx="50" cy="28" r="2" fill="#FFB347"/>
     </g>,
-    // 2 pothos — trailing
     <g key="p">
       <path d="M50 60 C 38 56, 30 42, 36 28" stroke="#3F8C6A" strokeWidth="3" fill="none" strokeLinecap="round"/>
       <path d="M50 60 C 62 54, 68 38, 60 22" stroke="#3F8C6A" strokeWidth="3" fill="none" strokeLinecap="round"/>
@@ -156,20 +122,17 @@ window.PotPlant = function PotPlant({ kind = 0, scale = 1, mood = 'leaf' }){
       <ellipse cx="62" cy="26" rx="6" ry="4" fill="#4FA67C" transform="rotate(30 62 26)"/>
       <ellipse cx="50" cy="20" rx="6" ry="4" fill="#4FA67C"/>
     </g>,
-    // 3 anthurium — heart leaf + spadix
     <g key="a">
       <path d="M50 60 C 30 56, 28 30, 50 24 C 72 30, 70 56, 50 60 Z" fill="#3F8C6A"/>
       <path d="M50 58 L 56 30" stroke="#FFD66B" strokeWidth="3" strokeLinecap="round"/>
       <ellipse cx="58" cy="26" rx="6" ry="4" fill="#FF8A6B"/>
     </g>,
-    // 4 ficus — round bush
     <g key="f">
       <circle cx="50" cy="35" r="22" fill="#3F8C6A"/>
       <circle cx="42" cy="28" r="3" fill="#4FA67C"/>
       <circle cx="58" cy="30" r="3" fill="#4FA67C"/>
       <circle cx="50" cy="22" r="3" fill="#4FA67C"/>
     </g>,
-    // 5 succulent — rosette
     <g key="s">
       <circle cx="50" cy="40" r="14" fill="#9ED1A4"/>
       <circle cx="40" cy="36" r="6" fill="#BBD9A5"/>
@@ -178,7 +141,6 @@ window.PotPlant = function PotPlant({ kind = 0, scale = 1, mood = 'leaf' }){
       <circle cx="50" cy="46" r="6" fill="#BBD9A5"/>
       <circle cx="50" cy="40" r="5" fill="#3F8C6A"/>
     </g>,
-    // 6 basilic — sprigs
     <g key="b">
       <path d="M40 62 L 38 28" stroke="#3F8C6A" strokeWidth="2" strokeLinecap="round"/>
       <path d="M50 62 L 50 22" stroke="#3F8C6A" strokeWidth="2" strokeLinecap="round"/>
@@ -195,10 +157,8 @@ window.PotPlant = function PotPlant({ kind = 0, scale = 1, mood = 'leaf' }){
 
   return (
     <svg viewBox="0 0 100 100" width={size} height={size} style={{display:'block'}}>
-      {/* pot */}
       <path d="M30 62 L 35 88 Q 50 92 65 88 L 70 62 Z" fill="#D86A4A" stroke="#2A2622" strokeWidth="2.5"/>
       <rect x="28" y="58" width="44" height="8" rx="2" fill="#FF8A6B" stroke="#2A2622" strokeWidth="2.5"/>
-      {/* plant */}
       <g>{variant}</g>
     </svg>
   );
