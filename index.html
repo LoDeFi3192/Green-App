@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#FFD66B" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Bloom" />
+  <meta name="description" content="Bloom — enregistre et entretiens tes plantes" />
+
+  <title>Bloom 🌿</title>
+
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png" />
+  <link rel="apple-touch-icon" href="./icon-512.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Grotesk:wght@400;500;700&family=Caveat:wght@500;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="./bloom-app.css" />
+
+  <style>
+    /* Boot shim — visible avant que React monte */
+    .boot{
+      position:fixed; inset:0;
+      display:grid; place-items:center;
+      background:#FBF3E4;
+      color:#2A2622;
+      font-family:'Space Grotesk', system-ui, sans-serif;
+    }
+    .boot .halo{
+      width:80px; height:80px; border-radius:50%;
+      background: conic-gradient(from 200deg, #FF8A6B, #FFD66B, #9EE6C1, #C9B6E4, #FF8A6B);
+      animation: spin 2.4s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg) } }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div class="boot"><div class="halo"></div></div>
+  </div>
+
+  <!-- React + ReactDOM (UMD) -->
+  <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+
+  <!-- Babel standalone (transpile in-browser) -->
+  <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+
+  <!-- Firebase compat SDK v10 -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+
+  <!-- App modules — order matters: data + firebase + shell + screens + app -->
+  <script type="text/babel" data-type="module" data-presets="react" src="./bloom-data.jsx"></script>
+  <script type="text/babel" data-type="module" data-presets="react" src="./bloom-firebase.jsx"></script>
+  <script type="text/babel" data-type="module" data-presets="react" src="./bloom-shell.jsx"></script>
+  <script type="text/babel" data-type="module" data-presets="react" src="./bloom-screen-auth.jsx"></script>
+  <script type="text/babel" data-type="module" data-presets="react" src="./bloom-screen-home.jsx"></script>
+  <script type="text/babel" data-type="module" data-presets="react" src="./bloom-screen-care.jsx"></script>
+  <script type="text/babel" data-type="module" data-presets="react" src="./bloom-screen-add.jsx"></script>
+  <script type="text/babel" data-type="module" data-presets="react" src="./bloom-screen-journal.jsx"></script>
+  <script type="text/babel" data-type="module" data-presets="react" src="./bloom-screen-profile.jsx"></script>
+  <script type="text/babel" data-type="module" data-presets="react" src="./bloom-screen-detail.jsx"></script>
+  <script type="text/babel" data-type="module" data-presets="react" src="./bloom-app.jsx"></script>
+
+  <!-- Service worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW reg failed', err));
+      });
+    }
+  </script>
+</body>
+</html>
