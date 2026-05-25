@@ -21,6 +21,36 @@ function App(){
   // Use cloud-aware bloom when logged in, plain local otherwise
   const bloom = window.useBloomCloud ? window.useBloomCloud(authUser || null) : window.useBloom();
 
+  // Auto-sync Firebase displayName → state.user.name on login
+  React.useEffect(() => {
+    if (!authUser) return;
+    if (!bloom || !bloom.setUser) return;
+    const fbName = (authUser.displayName || '').trim();
+    const currentName = (bloom.state.user.name || '').trim();
+    // Only update if Firebase has a name AND it differs from current
+    if (fbName && fbName !== currentName){
+      bloom.setUser({ name: fbName });
+    }
+  }, [authUser?.uid, authUser?.displayName]);
+
+  // Detect: logged in but no name anywhere → show prompt
+  const needsName = !!authUser
+    && !(authUser.displayName && authUser.displayName.trim())
+    && !(bloom?.state?.user?.name && bloom.state.user.name.trim() && bloom.state.user.name !== 'Léa');
+
+  const [nameInput, setNameInput] = React.useState('');
+  const submitName = async () => {
+    const n = nameInput.trim();
+    if (!n) return;
+    try {
+      if (authUser && authUser.updateProfile) {
+        await authUser.updateProfile({ displayName: n });
+      }
+    } catch(e){ console.warn('updateProfile failed', e); }
+    bloom.setUser({ name: n });
+    setNameInput('');
+  };
+
   // PWA install handling
   const [deferredPrompt, setDeferredPrompt] = React.useState(null);
   const [installVisible, setInstallVisible] = React.useState(false);
@@ -179,6 +209,40 @@ function App(){
 
       {toast && <Toast msg={toast.msg} k={toast.k}/>}
       <Confetti trigger={confetti}/>
+
+      {needsName && (
+        <>
+          <div className="sheet-bg"/>
+          <div className="sheet">
+            <div className="handle"/>
+            <h2 className="huge" style={{fontSize:22, marginBottom:6}}>Comment t'appelles-tu ?</h2>
+            <p className="txt" style={{marginBottom:14}}>On va l'utiliser pour personnaliser ton jardin ✨</p>
+            <input
+              type="text"
+              value={nameInput}
+              onChange={e=>setNameInput(e.target.value)}
+              onKeyDown={e=>{ if(e.key==='Enter') submitName(); }}
+              placeholder="Ton prénom"
+              autoFocus
+              style={{
+                width:'100%',
+                border:'2.5px solid var(--ink)',
+                borderRadius:14,
+                padding:'12px 14px',
+                fontFamily:'Space Grotesk, sans-serif',
+                fontSize:16,
+                background:'var(--paper)',
+                color:'var(--ink)',
+                boxShadow:'2px 2px 0 var(--ink)',
+                outline:'none',
+              }}
+            />
+            <div className="btn dark full lg" style={{marginTop:14}} onClick={submitName}>
+              Continuer
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Cloud sync indicator */}
       {authUser && bloom.synced && (

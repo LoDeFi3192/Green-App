@@ -5,7 +5,8 @@ window.ScreenHome = function({ bloom, nav, anim }){
   const rooms = ['all', ...new Set(state.plants.map(p=>p.room))];
   const filtered = filter === 'all' ? state.plants : state.plants.filter(p=>p.room===filter);
   const todayCount = state.plants.filter(p => window.daysUntil(p.nextWater) <= 0).length;
-  const firstName = state.user.name;
+  const firstName = (state.user.name && state.user.name.trim()) || '✨';
+  const initial = firstName.charAt(0) || '✨';
 
   const greeting = (() => {
     const h = new Date().getHours();
@@ -27,7 +28,7 @@ window.ScreenHome = function({ bloom, nav, anim }){
           <span className="h-script" style={{color:'var(--soft)', fontSize:18}}>{greeting} ☀️</span>
           <h1>Salut <span className="em">{firstName}</span></h1>
         </div>
-        <div className="avatar" onClick={()=>nav('profile')}>{firstName[0]}</div>
+        <div className="avatar" onClick={()=>nav('profile')}>{initial}</div>
       </div>
 
       {todayCount > 0 && (

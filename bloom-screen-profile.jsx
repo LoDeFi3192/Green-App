@@ -1,14 +1,33 @@
 // ===== Profile / Settings =====
 window.ScreenProfile = function({ bloom, nav, anim, install, authUser, onSignOut }){
-  const { state, reset } = bloom;
+  const { state, reset, setUser } = bloom;
   const [push, setPush] = React.useState(true);
   const [reduceMotion, setReduceMotion] = React.useState(false);
   const [confirmReset, setConfirmReset] = React.useState(false);
   const [confirmSignOut, setConfirmSignOut] = React.useState(false);
+  const [editName, setEditName] = React.useState(false);
+  const [nameDraft, setNameDraft] = React.useState('');
 
   const userName = authUser?.displayName || state.user.name;
+  const userInitial = (userName && userName.charAt(0)) || '✨';
   const userEmail = authUser?.email || null;
   const adoptedDays = window.daysUntil(state.user.joined) * -1;
+
+  const openEditName = () => {
+    setNameDraft(userName || '');
+    setEditName(true);
+  };
+  const saveName = async () => {
+    const n = nameDraft.trim();
+    if (!n) return;
+    try {
+      if (authUser && authUser.updateProfile){
+        await authUser.updateProfile({ displayName: n });
+      }
+    } catch(e){ console.warn('updateProfile failed', e); }
+    setUser({ name: n });
+    setEditName(false);
+  };
 
   return (
     <div className={`screen bg-lilac ${anim||''}`}>
@@ -19,14 +38,14 @@ window.ScreenProfile = function({ bloom, nav, anim, install, authUser, onSignOut
         </div>
       </div>
 
-      <div className="box" style={{background:'var(--butter)', display:'flex', alignItems:'center', gap:14, marginBottom:14}}>
+      <div className="box" style={{background:'var(--butter)', display:'flex', alignItems:'center', gap:14, marginBottom:14, cursor:'pointer'}} onClick={openEditName}>
         <div style={{
           width:64, height:64, borderRadius:'50%',
           background:'var(--pink)', border:'2.5px solid var(--ink)',
           boxShadow:'3px 3px 0 0 var(--ink)',
           display:'grid', placeItems:'center',
           fontFamily:'DM Serif Display, serif', fontSize:28
-        }}>{userName[0]}</div>
+        }}>{userInitial}</div>
         <div style={{flex:1}}>
           <div className="t-serif" style={{fontFamily:'DM Serif Display, serif', fontSize:20}}>{userName}</div>
           {userEmail
@@ -34,6 +53,7 @@ window.ScreenProfile = function({ bloom, nav, anim, install, authUser, onSignOut
             : <div className="tiny" style={{color:'var(--soft)'}}>Jardinière depuis {adoptedDays} jours · 📱 local uniquement</div>
           }
         </div>
+        <div className="pill outline" style={{flexShrink:0}}>✎</div>
       </div>
 
       <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:14}}>
@@ -155,6 +175,40 @@ window.ScreenProfile = function({ bloom, nav, anim, install, authUser, onSignOut
               <div className="btn coral" style={{flex:1}} onClick={onSignOut}>
                 {authUser ? 'Déconnexion' : 'Se connecter'}
               </div>
+            </div>
+          </div>
+        </>
+      )}
+      {editName && (
+        <>
+          <div className="sheet-bg" onClick={()=>setEditName(false)}/>
+          <div className="sheet">
+            <div className="handle"/>
+            <h2 className="huge" style={{fontSize:22, marginBottom:8}}>Modifier ton prénom</h2>
+            <p className="txt" style={{marginBottom:14}}>Comment souhaites-tu être appelée ?</p>
+            <input
+              type="text"
+              value={nameDraft}
+              onChange={e=>setNameDraft(e.target.value)}
+              onKeyDown={e=>{ if(e.key==='Enter') saveName(); }}
+              placeholder="Ton prénom"
+              autoFocus
+              style={{
+                width:'100%',
+                border:'2.5px solid var(--ink)',
+                borderRadius:14,
+                padding:'12px 14px',
+                fontFamily:'Space Grotesk, sans-serif',
+                fontSize:16,
+                background:'var(--paper)',
+                color:'var(--ink)',
+                boxShadow:'2px 2px 0 var(--ink)',
+                outline:'none',
+              }}
+            />
+            <div style={{display:'flex', gap:10, marginTop:14}}>
+              <div className="btn ghost" style={{flex:1}} onClick={()=>setEditName(false)}>Annuler</div>
+              <div className="btn dark" style={{flex:1}} onClick={saveName}>Sauvegarder</div>
             </div>
           </div>
         </>
