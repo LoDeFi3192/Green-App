@@ -1,119 +1,50 @@
-# Bloom 🌿 — App plantes
+# 🌿 Bloom — Plant care PWA
 
-App mobile (PWA) pour enregistrer et entretenir ses plantes.  
-Design dopamine deco · synchronisation cloud via Firebase.
+Tes plantes, ton rituel. Application web progressive (PWA) avec sync cloud Firebase.
 
-## 🚀 Déployer sur Vercel (depuis GitHub)
+## Stack
 
-### 1. Pousser le code sur GitHub
+- React 18 + Babel standalone (transpilation in-browser)
+- Firebase Auth (Email/Password + Google) + Firestore
+- Service Worker + Manifest (installable)
+- Single HTML entry, modules JSX servis statiques
 
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin https://github.com/<TON_USER>/bloom.git
-git push -u origin main
-```
-
-### 2. Importer dans Vercel
-
-1. Va sur [vercel.com/new](https://vercel.com/new)
-2. **Import Git Repository** → sélectionne ton repo `bloom`
-3. **Framework Preset** : **Other** (laisse vide, c'est du HTML statique)
-4. **Build & Output Settings** : laisse les valeurs par défaut
-5. Clique **Deploy**
-
-⏱ Premier déploiement en ~30 secondes. Tu reçois une URL `https://bloom-xxx.vercel.app`.
-
-### 3. Autoriser le domaine Vercel dans Firebase ⚠️ ÉTAPE CRUCIALE
-
-Sinon Firebase Auth refusera la connexion.
-
-1. Console Firebase → **Authentication** → onglet **Settings** → **Authorized domains**
-2. Clique **Add domain**
-3. Ajoute ton URL Vercel : `bloom-xxx.vercel.app`
-4. Si tu mets un domaine perso (`bloom.tondomaine.fr`), ajoute-le aussi
-
-### 4. Déployer les règles Firestore sécurisées
-
-Tes règles actuelles autorisent tout le monde — il faut les remplacer.
-
-**Option A — via la console (le plus simple)**
-1. Console Firebase → **Firestore Database** → onglet **Règles**
-2. Copie-colle le contenu du fichier [`firestore.rules`](./firestore.rules)
-3. Clique **Publier**
-
-**Option B — via la CLI Firebase**
-```bash
-npm i -g firebase-tools
-firebase login
-firebase use --add  # sélectionne ton projet
-firebase deploy --only firestore:rules
-```
-
-### 5. C'est en ligne 🎉
-
-- Ouvre l'URL sur ton téléphone
-- Bouton **« Installer »** en bas → app sur écran d'accueil (Android)
-- Sur iOS : Partager → « Sur l'écran d'accueil »
-
----
-
-## 📁 Structure du projet
+## Structure
 
 ```
-.
-├── index.html               # Entrée principale (l'app)
-├── bloom-app.css            # Styles complets
-├── bloom-app.jsx            # Routing + shell
-├── bloom-data.jsx           # State + persistance localStorage
-├── bloom-firebase.jsx       # Auth + sync Firestore
-├── bloom-shell.jsx          # Phone frame, tab bar, illustrations
-├── bloom-screen-*.jsx       # 7 écrans
-├── manifest.webmanifest     # Config PWA
-├── sw.js                    # Service worker (offline)
-├── icon-192.png             # Icônes app
-├── icon-512.png
-├── firestore.rules          # Règles sécurité Firestore
-├── vercel.json              # Config Vercel
-└── README.md                # Ce fichier
+index.html               # Entrée — charge React, Babel, Firebase, modules
+bloom-app.css            # Styles complets (fullscreen, no mockup)
+bloom-app.jsx            # App shell, routing, auth state, name prompt
+bloom-data.jsx           # useBloom hook + state local (localStorage)
+bloom-firebase.jsx       # Firebase init, bloomAuth, bloomCloud, useBloomCloud
+bloom-shell.jsx          # Phone wrapper (fullscreen), TabBar, Toast, Confetti, icons
+bloom-screen-auth.jsx    # Login / Signup / Reset / Guest
+bloom-screen-home.jsx    # Garden home (plant list + filters)
+bloom-screen-care.jsx    # Today's care tasks
+bloom-screen-add.jsx     # Add plant
+bloom-screen-detail.jsx  # Plant detail
+bloom-screen-journal.jsx # Journal entries
+bloom-screen-profile.jsx # Profile + name editor + settings
+sw.js                    # Service worker (cache-first)
+manifest.webmanifest     # PWA manifest
+vercel.json              # Vercel routing/headers config
+firestore.rules          # Security rules (à publier dans Firebase Console)
+icon-192.png / icon-512.png
 ```
 
-## 🛠 Stack
+## Deploy
 
-- **HTML/CSS** statique — pas de build
-- **React 18** + **Babel** (transpilé dans le navigateur)
-- **Firebase Auth** + **Firestore** (compat SDK v10)
-- **PWA** : manifest + service worker + offline-first
+Auto-deploy via Vercel sur push `main`. Aucun build step (HTML statique + JSX transpilé client).
 
-## 🔒 Sécurité
+### Firebase setup (à faire UNE FOIS dans la console)
 
-- Chaque utilisateur ne peut accéder qu'à son propre document (`/bloom/{uid}`)
-- Les clés Firebase publiques (apiKey, etc.) sont normales et conçues pour le navigateur — la sécurité passe par les règles Firestore
-- Mode offline : si Firebase n'est pas joignable, l'app continue de fonctionner en local
+1. **Authentication → Settings → Authorized domains** : ajouter `green-app-indol.vercel.app`
+2. **Firestore → Rules** : coller le contenu de `firestore.rules` et publier
+3. **Authentication → Sign-in methods** : activer Email/Password (et Google si besoin)
 
-## 🧪 Tester en local
+## Comportement clé
 
-Tu ne peux pas juste double-cliquer sur `index.html` (le service worker et les modules JSX ont besoin d'un serveur). Lance un serveur local :
-
-```bash
-# Avec Python
-python3 -m http.server 8000
-
-# Ou avec Node
-npx serve
-
-# Puis ouvre http://localhost:8000
-```
-
-## 🔮 Roadmap
-
-- [ ] Photos de plantes (Firebase Storage)
-- [ ] Notifications push de rappel d'arrosage (Firebase Messaging)
-- [ ] Reconnaissance réelle de plantes via API (PlantNet)
-- [ ] Partage de plantes entre comptes
-
----
-
-Made with 🌿 + dopamine
+- **Login avec displayName** → header affiche le prénom automatiquement
+- **Login sans displayName** (Google sans nom, signup sans prénom) → prompt obligatoire
+- **Profile → carte avatar** : éditable, sauve dans Firebase Auth (`updateProfile`) + state
+- **Mode invité** : possible via "Continuer sans compte", data 100% locale
